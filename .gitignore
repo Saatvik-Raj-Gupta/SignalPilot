@@ -218,3 +218,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+#General
+SIGNALPILOT_CODING_AGENT_PROMPT.md
+SIGNALPILOT_IMPLEMENTATION_PLAN.md
+SIGNALPILOT_PROJECT_SPEC.md
