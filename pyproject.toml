@@ -9,13 +9,27 @@ description = "An educational reinforcement-learning traffic signal simulator"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "matplotlib>=3.8",
     "numpy>=1.26",
+    "PyYAML>=6.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
     "ruff>=0.6",
+]
+ui = [
+    "streamlit>=1.38",
+]
+dqn = [
+    "torch>=2.4",
+]
+gymnasium = [
+    "gymnasium>=1.0",
+]
+sumo = [
+    "traci>=1.22",
 ]
 
 [tool.setuptools.packages.find]

@@ -18,12 +18,15 @@ def test_reset_returns_valid_initial_state() -> None:
 
 
 def test_step_returns_contract_and_switches_phase() -> None:
-    environment = IntersectionEnvironment(seed=7)
+    environment = IntersectionEnvironment(
+        config=EnvironmentConfig(minimum_green_time=0),
+        seed=7,
+    )
 
     result = environment.step(Action.SWITCH_PHASE)
 
     assert result.state.time_step == 1
-    assert result.state.phase is SignalPhase.EW_GREEN
+    assert result.state.phase is SignalPhase.YELLOW
     assert result.reward == 0.0
     assert result.terminated is False
     assert result.truncated is False
@@ -52,3 +55,40 @@ def test_horizon_terminates_episode() -> None:
     result = environment.step(Action.KEEP_PHASE)
 
     assert result.terminated is True
+
+
+def test_switch_request_before_minimum_green_is_ignored() -> None:
+    environment = IntersectionEnvironment(
+        config=EnvironmentConfig(minimum_green_time=2),
+        seed=3,
+    )
+
+    result = environment.step(Action.SWITCH_PHASE)
+
+    assert result.state.phase is SignalPhase.NS_GREEN
+    assert result.info["phase_switched"] is False
+
+
+def test_signal_transition_uses_yellow_then_all_red() -> None:
+    environment = IntersectionEnvironment(
+        config=EnvironmentConfig(
+            minimum_green_time=0,
+            yellow_duration=2,
+            all_red_duration=1,
+        ),
+        seed=3,
+    )
+
+    phases = [
+        environment.step(Action.SWITCH_PHASE).state.phase,
+        environment.step(Action.KEEP_PHASE).state.phase,
+        environment.step(Action.KEEP_PHASE).state.phase,
+        environment.step(Action.KEEP_PHASE).state.phase,
+    ]
+
+    assert phases == [
+        SignalPhase.YELLOW,
+        SignalPhase.YELLOW,
+        SignalPhase.ALL_RED,
+        SignalPhase.EW_GREEN,
+    ]

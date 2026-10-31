@@ -1,0 +1,18 @@
+# SignalPilot default simulator configuration.
+# The Python API remains the source of truth for typed configuration.
+episode_horizon: 60
+initial_phase: ns_green
+arrival_rates:
+  north: 0.30
+  south: 0.30
+  east: 0.30
+  west: 0.30
+saturation_flow: 1
+minimum_green_time: 5
+yellow_duration: 2
+all_red_duration: 1
+initial_queues:
+  north: 0
+  south: 0
+  east: 0
+  west: 0

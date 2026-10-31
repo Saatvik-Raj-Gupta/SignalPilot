@@ -15,10 +15,12 @@ class Approach(StrEnum):
 
 
 class SignalPhase(StrEnum):
-    """The two movement phases used by the MVP."""
+    """Signal states, including non-conflicting transition states."""
 
     NS_GREEN = "ns_green"
     EW_GREEN = "ew_green"
+    YELLOW = "yellow"
+    ALL_RED = "all_red"
 
 
 class Action(IntEnum):
@@ -30,17 +32,18 @@ class Action(IntEnum):
 
 @dataclass(frozen=True)
 class IntersectionState:
-    """A read-only snapshot of the simulator at one time step.
-
-    Queue dynamics are intentionally not implemented in Phase 1, so queues are
-    represented explicitly as four zero-valued approach counts. Later phases
-    will update these values using the same state contract.
-    """
+    """A read-only snapshot of the simulator at one time step."""
 
     time_step: int
     phase: SignalPhase
     queues: tuple[int, int, int, int]
     seed: int | None
+    elapsed_green_time: int = 0
+    transition_remaining: int = 0
+    pending_phase: SignalPhase | None = None
+    total_arrivals: int = 0
+    total_served: int = 0
+    total_waiting_time: int = 0
 
     def __post_init__(self) -> None:
         if self.time_step < 0:
@@ -49,6 +52,14 @@ class IntersectionState:
             raise ValueError("queues must contain one value per approach")
         if any(queue < 0 for queue in self.queues):
             raise ValueError("queues must be non-negative")
+        if self.elapsed_green_time < 0 or self.transition_remaining < 0:
+            raise ValueError("time counters must be non-negative")
+        if self.total_arrivals < 0 or self.total_served < 0:
+            raise ValueError("vehicle counters must be non-negative")
+        if self.total_waiting_time < 0:
+            raise ValueError("total_waiting_time must be non-negative")
+        if self.pending_phase in (SignalPhase.YELLOW, SignalPhase.ALL_RED):
+            raise ValueError("pending_phase must be a green phase")
 
     def queue_for(self, approach: Approach) -> int:
         """Return the queue length for one named approach."""
